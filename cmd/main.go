@@ -2,11 +2,12 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/JulianDavidGamboa/basic-go-api/cmd/authorization"
 	"github.com/JulianDavidGamboa/basic-go-api/handler"
 	"github.com/JulianDavidGamboa/basic-go-api/storage"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -17,13 +18,19 @@ func main() {
 	}
 
 	store := storage.NewMemory()
-	mux := http.NewServeMux()
 
-	handler.RoutePerson(mux, &store)
-	handler.RouteLogin(mux, &store)
+	e := echo.New()
+	e.Use(middleware.Recover())
+	e.Use(middleware.Logger())
+
+	// mux := http.NewServeMux()
+
+	handler.RoutePerson(e, &store)
+	handler.RouteLogin(e, &store)
 
 	log.Println("Servidor iniciado en el puerto 8080")
-	err = http.ListenAndServe(":8080", mux)
+	// err = http.ListenAndServe(":8080", mux)
+	err = e.Start(":8080")
 
 	if err != nil {
 		log.Printf("Error en el servidor: %v\n", err)
